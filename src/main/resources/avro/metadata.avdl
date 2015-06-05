@@ -1,4 +1,4 @@
-@namespace("org.ga4gh.models")
+@namespace("org.ga4gh.models") 
 
 /**
 This protocol defines metadata used in the other GA4GH protocols.
@@ -51,40 +51,80 @@ record Individual {
   union { null, OntologyTerm } species = null;
 
   /** The genetic sex of this individual. Use `null` when unknown. */
-  union { null, OntologyTerm } sex = null;
+  union { null, OntologyTerm } sex = null; 
+  // GXR gender vs sex??
 
   /**
   The developmental stage of this individual. Using Uberon is recommended.
   TODO: Add link to uberon
   */
   union { null, OntologyTerm } developmentalStage = null;
+  // GXR age??
 
   /**
   The date of birth of this individual in milliseconds from the epoch.
   This field may be approximate.
   */
   union { null, long } dateOfBirth = null;
+  // GXR de-identification??
 
   /**
   Diseases with which the individual has been diagnosed.
   TODO: Is this the right representation?
   */
   array<OntologyTerm> diseases = [];
+  // GXR time component
+
+  array<Disease> diseases = [] ;
+  // GXR define type Disease
+  	 // diagnose_date
+	 // Ontology term for the disease
+     // bried description
+
+    array<Characteristics> characteristics ; // how to encode this  
+	 // icd,  morphology, histograde // all ontology terms 
+     // nodestatus, positivenodes, breast_nodestatus, positivenodes, // how to encode vicinity to tumor?
+	 // tnmstage, tnmnodeclass, tnmmetsclass // property of the disease
+     // tumorsize, tumorstage 
+     // erstatus, erdefinition, erpercent, erintensity, erallred, 
+     // prstatus, prdefinition, prpercent, printensity, prallred, 
+     // herceptest, fish, her2status, her2definition, her2percent, her2intensity, 
+     // ck56status, ck56percent, ck56intensity, 
+     // ck14status, ck14percent, ck14intensity, 
+     // egfrstatus, egfrpercent, egfrintensity, 
+	 //
+	 // date of acquisition, place/id of aquirer, sampleid // source/attribution record ??
+
+    array<Sample> samples ; // rnaavailable, dnaavailable, lclavailable, buffycoat, tumorblock, tumorslides,
 
   /**
   Phenotypes for this individual.
   TODO: Is this the right representation?
   */
   array<OntologyTerm> phenotypes = [];
+  // GXR why separate from diseases?  
+  // when, characteristics
+  // pregnancies, menopauseage, menopausestatus, 
 
   /**
   Disease area specific classification (e.g. classification of cancer samples
   such as Dukes)
   */
   union { null, string } stagingSystem = null;
+  // GXR why not part of disease entry?
 
   /** A description of the clinical treatment used for this individual. */
   union { null, string } clinicalTreatment = null;
+  // GXR this needs time, dosage, type, etc information
+  // bilmastage, bilmastdate, biloophage, biloophdate
+
+  // GXR environment: smoking, country, religion, ethnicity, race, diet, 
+  array<Environment> environment ;
+  
+
+  array<Treatment> treatments = [] ;
+  // GXR need to define Treatment type
+
 
   /** The strain of this individual, for non-humans. */
   union { null, string } strain = null;
@@ -93,7 +133,11 @@ record Individual {
   A map of additional individual information.
   */
   map<array<string>> info = {};
+
 }
+// what is covered: which tumors, previous treatments, 
+// missing so far: demographics, pedigree,
+
 
 /**
 A biological sample used in an experiment. (e.g. whole blood from
@@ -141,6 +185,7 @@ record Sample {
   TODO: Fixed unit? Years would be natural in human context.
   */
   union { null, long } ageAtSampling = null;
+  // GXR redundant??
 
   /**
   The cell type of this sample.
@@ -154,21 +199,26 @@ record Sample {
   TODO: discuss further. Other possibilities: Cellosaurus (nextprot), BRENDA/BTO, EFO (EBI)
   */
   union { null, OntologyTerm } cellLine = null;
+  // GXR too specific
 
   /**
   Geographic coordinates from which the individual was obtained.
   TODO: Figure out the right type for this field.
   */
   union { null, string } geocode = null;
+  // GXR refer back to individual??
 
   /** A descriptor of the sample type. (e.g. `frozen`) */
   union { null, string } sampleType = null;
+  // GXR frozen, paraffin, slide, DNA, LCL, RNA, .. 
+  // semantic overlap with Experiment ... 
 
   /**
   The anatomical part of the individual from which this sample derives.
   Using [Uberon](http://uberon.org) is recommended.
   */
   union { null, OntologyTerm } organismPart = null;
+  // blood, tissue/tumor origin, ...
 
   /**
   A map of additional sample information.
@@ -176,6 +226,7 @@ record Sample {
   map<array<string>> info = {};
 }
 
+// GXR too specific and does not cover 
 /**
 An experimental preparation of a `Sample`.
 */
@@ -246,6 +297,7 @@ record Experiment {
 
   /** The sequencing center used as part of this experiment. */
   union { null, string } sequencingCenter;
+  // GXR too specific
 
   /**
   The platform unit used as part of this experiment. This is a flowcell-barcode
@@ -267,7 +319,8 @@ record IndividualGroup {
   string id;
 
   /** The name of the individual group. */
-  union { null, string } name = null;
+  union { null, string } name = null; 
+  // GXR kindred number 
 
   /** A description of the individual group. */
   union { null, string } description = null;
@@ -286,6 +339,8 @@ record IndividualGroup {
 
   /** The type of individual group. */
   union { null, string } type = null;
+
+  // GXR source  // who created the pedigree info
 
   /**
   A map of additional individual group information.
