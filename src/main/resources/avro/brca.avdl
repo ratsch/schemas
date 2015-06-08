@@ -1,10 +1,10 @@
 @namespace("org.ga4gh.models")
 
 /**
-Defines types used by the GA4GH BRCA Challenge API.
+Defines types used by the GA4GH VariantClassification API.
 */
 
-protocol BRCAChallenge {
+protocol VariantClassification {
 
 import idl "common.avdl" ;
 import idl "variants.avdl" ;
