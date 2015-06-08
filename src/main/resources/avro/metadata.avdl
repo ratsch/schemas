@@ -8,17 +8,24 @@ protocol Metadata {
 
 import idl "common.avdl";
 import idl "ontologies.avdl";
+import idl "disease.avdl";
 
 /**
 An individual (or subject) typically corresponds to an individual
 human or other organism.
+
+GXR: BRCA Challenge related info:
+(partially) missing so far: demographics
 */
+
 record Individual {
   /** The individual UUID. This is globally unique. */
   string id;
 
-  /** The IDs of the individual groups this individual belongs to. */
-  array<string> groupIds = [];
+  /** The IDs of the individual groups this individual belongs to. 
+      (should refer to object of type IndividualGroup)
+  */
+  array<string> groupIds = []; 
 
   /** The name of the individual. */
   union { null, string } name = null;
@@ -50,84 +57,72 @@ record Individual {
   */
   union { null, OntologyTerm } species = null;
 
+  /** The strain of this individual, for non-humans. */
+  union { null, string } strain = null;
+  // GXR: can't this be part of an extended species definition?
+
   /** The genetic sex of this individual. Use `null` when unknown. */
   union { null, OntologyTerm } sex = null; 
-  // GXR gender vs sex??
 
   /**
   The developmental stage of this individual. Using Uberon is recommended.
   TODO: Add link to uberon
   */
   union { null, OntologyTerm } developmentalStage = null;
-  // GXR age??
+  // GXR: relation to age??
 
   /**
   The date of birth of this individual in milliseconds from the epoch.
   This field may be approximate.
   */
   union { null, long } dateOfBirth = null;
-  // GXR de-identification??
+  // GXR: how to deal with dates for de-identified cases?
 
-  /**
-  Diseases with which the individual has been diagnosed.
-  TODO: Is this the right representation?
+  /** Diseases with which the individual has been diagnosed.
+      (should refer to object of type Disease)
+      TODO: Is this the right representation?
   */
-  array<OntologyTerm> diseases = [];
-  // GXR time component
+  array<string> diseaseIds = [] ;   // GXR: new disease records with time and characteristics
 
-  array<Disease> diseases = [] ;
-  // GXR define type Disease
-  	 // diagnose_date
-	 // Ontology term for the disease
-     // bried description
+  /** Phenotypes that were determined for the individual.
+      (should refer to object of type Phenotype)
+      TODO: Is this the right representation?
+  */
+  array<string> phenotypeIds = [] ; // GXR: new phenotype records with characteristics
 
-    array<Characteristics> characteristics ; // how to encode this  
-	 // icd,  morphology, histograde // all ontology terms 
-     // nodestatus, positivenodes, breast_nodestatus, positivenodes, // how to encode vicinity to tumor?
-	 // tnmstage, tnmnodeclass, tnmmetsclass // property of the disease
-     // tumorsize, tumorstage 
-     // erstatus, erdefinition, erpercent, erintensity, erallred, 
-     // prstatus, prdefinition, prpercent, printensity, prallred, 
-     // herceptest, fish, her2status, her2definition, her2percent, her2intensity, 
-     // ck56status, ck56percent, ck56intensity, 
-     // ck14status, ck14percent, ck14intensity, 
-     // egfrstatus, egfrpercent, egfrintensity, 
-	 //
-	 // date of acquisition, place/id of aquirer, sampleid // source/attribution record ??
+  /** A description of the clinical treatments used for this individual. 
+      (should refer to object of type Treatment))
+      TODO: Is this the right representation?
+  */
+  array<string> treatmentIds ; // new list of ids to treatment records
 
-    array<Sample> samples ; // rnaavailable, dnaavailable, lclavailable, buffycoat, tumorblock, tumorslides,
+  // GXR environment: smoking, country, religion, ethnicity, race, diet, 
+  array<string> environmentalContextIds ; // new list of ids to environment records
+  
+  // date of acquisition, place/id of aquirer, sampleid // source/attribution record ??
+  array<string> sampleIds ; 
+  // BRCA challenge related info: 
+  //   rnaavailable, dnaavailable, lclavailable, buffycoat, tumorblock, tumorslides,
+  // GXR: redundant? We could query the API whether there are any samples for this specific Individual
 
-  /**
-  Phenotypes for this individual.
-  TODO: Is this the right representation?
+  /** Phenotypes for this individual.
+      (should refer to object of type Phenotype))
+      TODO: Is this the right representation?
   */
   array<OntologyTerm> phenotypes = [];
-  // GXR why separate from diseases?  
-  // when, characteristics
-  // pregnancies, menopauseage, menopausestatus, 
+  // GXR: why separate from diseases?  
 
   /**
   Disease area specific classification (e.g. classification of cancer samples
   such as Dukes)
   */
-  union { null, string } stagingSystem = null;
-  // GXR why not part of disease entry?
+  // union { null, string } stagingSystem = null;
+  // GXR: why not part of disease entry? Suggest to remove.
 
-  /** A description of the clinical treatment used for this individual. */
-  union { null, string } clinicalTreatment = null;
-  // GXR this needs time, dosage, type, etc information
-  // bilmastage, bilmastdate, biloophage, biloophdate
-
-  // GXR environment: smoking, country, religion, ethnicity, race, diet, 
-  array<Environment> environment ;
-  
-
-  array<Treatment> treatments = [] ;
-  // GXR need to define Treatment type
-
-
-  /** The strain of this individual, for non-humans. */
-  union { null, string } strain = null;
+  /**
+  Sources record for this individual (attribution and references to creators, etc)
+  */	 
+  Sources sources ; 
 
   /**
   A map of additional individual information.
@@ -135,9 +130,46 @@ record Individual {
   map<array<string>> info = {};
 
 }
-// what is covered: which tumors, previous treatments, 
-// missing so far: demographics, pedigree,
 
+/**
+Represents a group of individuals. (e.g. a trio, twin, ...)
+*/
+record IndividualGroup {
+  /** The individual group UUID. This is globally unique. */
+  string id;
+
+  /**
+  Sources record for this group (attribution and references to creators, etc)
+  */	 
+  Sources sources ;
+
+  /** The name of the individual group. */
+  union { null, string } name = null; 
+
+  /** A description of the individual group. */
+  union { null, string } description = null;
+
+  /**
+  The time at which this record was created. 
+  Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+  */
+  string recordCreateTime;
+
+  /**
+  The time at which this record was last updated.
+  Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+  */
+  string recordUpdateTime;
+
+  /** The type of individual group. */
+  union { null, string } type = null;
+  // GXR: TODO: this should be an onotolgy term
+
+  /**
+  A map of additional individual group information.
+  */
+  map<array<string>> info = {};
+}
 
 /**
 A biological sample used in an experiment. (e.g. whole blood from
@@ -146,6 +178,11 @@ an affected individual)
 record Sample {
    /** The sample UUID. This is globally unique. */
   string id;
+
+  /**
+  Sources record for this sample (attribution and references to creators, etc)
+  */	 
+  Sources sources ;
 
   /** The ID of the individual this sample belongs to. */
   union { null, string } individualId = null;
@@ -185,13 +222,14 @@ record Sample {
   TODO: Fixed unit? Years would be natural in human context.
   */
   union { null, long } ageAtSampling = null;
-  // GXR redundant??
+  // GXR: redundant when one has samplingDate and DOB??
 
   /**
   The cell type of this sample.
   Using the [Cell Ontology](http://cellontology.org/) (CL) is recommended. See 
   */
   union { null, OntologyTerm } cellType = null;
+  // GXR: too specific? why not organismPart?
 
   /** 
   The cell line of this sample. 
@@ -199,19 +237,20 @@ record Sample {
   TODO: discuss further. Other possibilities: Cellosaurus (nextprot), BRENDA/BTO, EFO (EBI)
   */
   union { null, OntologyTerm } cellLine = null;
-  // GXR too specific
+  // GXR: this appears too specific
 
   /**
   Geographic coordinates from which the individual was obtained.
   TODO: Figure out the right type for this field.
   */
   union { null, string } geocode = null;
-  // GXR refer back to individual??
+  // GXR: odd place here. Refer back to individual??
 
   /** A descriptor of the sample type. (e.g. `frozen`) */
   union { null, string } sampleType = null;
-  // GXR frozen, paraffin, slide, DNA, LCL, RNA, .. 
+  // GXR: frozen, paraffin, slide, DNA, LCL, RNA, .. 
   // semantic overlap with Experiment ... 
+  // this appears more related on how this samples is stored/kept
 
   /**
   The anatomical part of the individual from which this sample derives.
@@ -226,13 +265,17 @@ record Sample {
   map<array<string>> info = {};
 }
 
-// GXR too specific and does not cover 
 /**
 An experimental preparation of a `Sample`.
 */
 record Experiment {
   /** The experiment UUID. This is globally unique. */
   string id;
+
+  /**
+  Sources record for this experiment (attribution and references to creators, etc)
+  */	 
+  Sources sources ;
 
   /** The name of the experiment. */
   union { null, string } name = null;
@@ -262,12 +305,14 @@ record Experiment {
   /**
   The molecule examined in this experiment. (e.g. genomics DNA, total RNA)
   */
+  // GXR: needs ontology term
   union { null, string } molecule = null;
 
   /**
   The experiment technique or strategy applied to the sample.
   (e.g. whole genome sequencing, RNA-seq, RIP-seq)
   */
+  // GXR: needs ontology term here
   union { null, string } strategy = null;
 
   /**
@@ -277,9 +322,11 @@ record Experiment {
   union { null, string } selection = null;
 
   /** The name of the library used as part of this experiment. */
+  // GXR: appears too specific to sequencing, suggest to use higher level of abstraction 
   union { null, string } library = null;
 
   /** The configuration of sequenced reads. (e.g. Single or Paired) */
+  // GXR: appears too specific to sequencing, suggest to use higher level of abstraction
   union { null, string } libraryLayout = null;
 
   /**
@@ -293,16 +340,18 @@ record Experiment {
   TODO: This isn't actually a file is it?
   Should this be `instrumentData` instead?
   */
+  // GXR: sounds too specific
   union { null, string } instrumentDataFile = null;
 
   /** The sequencing center used as part of this experiment. */
+  // GXR too specific, what about "ExperimentSite" 
   union { null, string } sequencingCenter;
-  // GXR too specific
 
   /**
   The platform unit used as part of this experiment. This is a flowcell-barcode
   or slide unique identifier.
   */
+  // GXR: too specific?
   union { null, string } platformUnit = null;
 
   /**
@@ -311,42 +360,6 @@ record Experiment {
   map<array<string>> info = {};
 }
 
-/**
-Represents a group of individuals. (e.g. a trio)
-*/
-record IndividualGroup {
-  /** The individual group UUID. This is globally unique. */
-  string id;
-
-  /** The name of the individual group. */
-  union { null, string } name = null; 
-  // GXR kindred number 
-
-  /** A description of the individual group. */
-  union { null, string } description = null;
-
-  /**
-  The time at which this record was created. 
-  Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
-  */
-  string recordCreateTime;
-
-  /**
-  The time at which this record was last updated.
-  Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
-  */
-  string recordUpdateTime;
-
-  /** The type of individual group. */
-  union { null, string } type = null;
-
-  // GXR source  // who created the pedigree info
-
-  /**
-  A map of additional individual group information.
-  */
-  map<array<string>> info = {};
-}
 
 /**
 An analysis contains an interpretation of one or several experiments.
@@ -356,6 +369,11 @@ information about the methodology used.
 record Analysis {
   /** The analysis UUID. This is globally unique. */
   string id;
+
+  /**
+  Sources record for this analysis (attribution and references to creators, etc)
+  */	 
+  Sources sources ;
 
   /** The name of the analysis. */
   union { null, string } name = null;

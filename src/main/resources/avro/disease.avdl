@@ -1,0 +1,205 @@
+@namespace("org.ga4gh.models") 
+
+/**
+This protocol defines disease information used in the other GA4GH protocols.
+*/
+
+protocol Disease {
+
+import idl "common.avdl";
+import idl "ontologies.avdl";
+import idl "source.avdl";
+
+/**
+A disease or treatment characteristic is a description of one specific aspect of a particular abnormal condition or its treatment.
+It stores a key, a description and a value for the characteristic.
+
+// BRCA challenge related properties
+// Disease: 
+//   icd,  morphology, histograde // all ontology terms 
+//   nodestatus, positivenodes, breast_nodestatus, positivenodes, // how to encode vicinity to tumor?
+//   tnmstage, tnmnodeclass, tnmmetsclass // property of the disease
+//   tumorsize, tumorstage 
+//   erstatus, erdefinition, erpercent, erintensity, erallred, 
+//   prstatus, prdefinition, prpercent, printensity, prallred, 
+//   herceptest, fish, her2status, her2definition, her2percent, her2intensity, 
+//   ck56status, ck56percent, ck56intensity, 
+//   ck14status, ck14percent, ck14intensity, 
+//   egfrstatus, egfrpercent, egfrintensity, 
+// Treatment:
+//   bilmastage, bilmastdate, biloophage, biloophdate, ...
+// Phenotype:
+//   pregnancies, menopauseage, menopausestatus, 
+*/
+
+record DTEPCharacteristic {
+
+      OntologyTerm propertyTerm ;  // GXR: TODO: do we have an ontology term for all characteristics that we care about?
+      string description ;         // GXR: redundant?
+
+      union {null, string, float, DTEPCharacteristic} value = null ;       
+      	                           // the specific value related to this characteristic
+				   // allow recursive definition for complex characteristics
+
+      string remark ;              // a note regarding this specific characteristic
+ 
+      Sources sources ;            // microattribution, cross-references to samples, people, etc.
+}
+
+/**
+  A disease is a particular abnormal condition, a disorder of a
+  structure or function, that affects part or all of an
+  organism. (http://en.wikipedia.org/wiki/Disease).  
+*/
+
+record Disease {
+
+      string id ;                  // The disease UUID. This is globally unique.
+
+      /**
+      The time at which this record was created.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordCreateTime;
+
+      /**
+      The time at which this record was last updated.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordUpdateTime;
+
+      OntologyTerm diseaseTerm ;   // ontology term that precisely describes the disease
+      string diseaseDescription ;  // GXR: redundant?
+      
+      long diagnoseDate ;          // GXR: de-identified dates?
+      string remark ;              // a note regarding this disease
+
+      array<DTEPCharacteristic> characteristics = [] ;
+
+      Sources sources ;            // microattribution, cross-references to samples, people, etc.
+}
+
+/** 
+  A phenotype is the composite of an organism's observable
+  characteristics or traits, such as its morphology, development,
+  biochemical or physiological properties, phenology, behavior, and
+  products of behavior. (http://en.wikipedia.org/wiki/Phenotype) 
+*/
+
+record Phenotype {
+
+      string id ;                  // The disease UUID. This is globally unique.
+
+      /**
+      The time at which this record was created.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordCreateTime;
+
+      /**
+      The time at which this record was last updated.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordUpdateTime;
+
+      OntologyTerm phenotypeTerm ;   // ontology term that precisely describes the phenotype
+      string phenotypeDescription ;  // GXR: redundant?
+      
+      long phenotypeDate ;          // GXR: de-identified dates?
+      string remark ;              // a note regarding this phenotype
+
+      array<DTEPCharacteristic> characteristics = [] ;
+
+      Sources sources ;            // microattribution, cross-references to samples, people, etc.
+}
+
+
+/**
+The context in which a genotype gives rise to a phenotype.
+This is fairly open-ended; as a stub we have a simple ontology term.
+For example, a controlled term for a drug, or perhaps an instance of a	
+complex environment including temperature and air quality, or perhaps
+the anatomical environment (gut vs tissue type vs whole organism).
+
+GXR: copied from G2P and enriched with characteristics.
+TODO: unification with G2P
+
+BRCA Challenge related info:
+     smoking, country, religion, ethnicity, race, diet, ...
+*/
+record EnvironmentalContext {
+
+      /** The Environment ID. */
+      string  id ;
+
+      /**
+      The time at which this record was created.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordCreateTime;
+
+      /**
+      The time at which this record was last updated.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordUpdateTime;
+
+      /**
+      Examples of some environment types could be drawn from:
+      Ontology for Biomedical Investigations (OBI): http://purl.obofoundry.org/obo/obi/browse
+      Chemical Entities of Interest (ChEBI): http://www.ontobee.org/browser/index.php?o=chebi
+      Environment Ontology (ENVO):  http://www.ontobee.org/browser/index.php?o=ENVO
+      Anatomy (Uberon): http://www.ontobee.org/browser/index.php?o=uberon
+      */
+      OntologyTerm environmentType;
+
+      array<DTEPCharacteristic> characteristics = [] ;
+
+      /**
+        A textual description of the environment. This is used to complement
+        the structured description in the environmentType field
+      */
+      string description ;
+
+}
+
+/** 
+  Therapy (often abbreviated tx or Tx) is the attempted remediation
+  of a health problem, usually following a diagnosis. In the medical
+  field, it is usually synonymous with treatment (also abbreviated tx).
+
+  Relevant information may include: time, dosage, type, etc 
+
+  GXR: treatment or therapy?
+*/   
+
+record Treatment {
+
+      string id ;                        // The treatment UUID. This is globally unique.
+
+      /**
+      The time at which this record was created.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordCreateTime;
+
+      /**
+      The time at which this record was last updated.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordUpdateTime;
+
+      OntologyTerm treatmentTerm ;       // ontology term that precisely describes the treatment
+      string treatmentDescription ;      // GXR: redundant?
+
+      long treatmentData ;               // GXR: de-identified dates?
+      string remark ;                    // a note regarding this treatment
+
+      array<DTEPCharacteristic> characteristics = [] ;
+
+      array<string> relatedDiseaseIds = [] ; // cross references to diseases related to this treatment 
+
+      Sources sources ;                  // microattribution, cross-references to samples, people, etc.
+}
+
+}

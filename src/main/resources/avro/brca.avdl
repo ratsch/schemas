@@ -1,0 +1,146 @@
+@namespace("org.ga4gh.models")
+
+/**
+Defines types used by the GA4GH BRCA Challenge API.
+*/
+
+protocol BRCAChallenge {
+
+import idl "common.avdl" ;
+import idl "variants.avdl" ;
+import idl "metadata.avdl" ;
+import idl "source.avdl" ;
+
+/** A StudyCohort is a group of individuals assembled for the purpose of subsequent analyses. 
+    Specific methodolgy may have been used to identify the group.
+*/
+
+record StudyCohort {
+
+      /** The StudyCohort UUID. This is globally unique. */
+      string id ;
+
+      /**
+      The time at which this record was created.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordCreateTime;
+
+      /**
+      The time at which this record was last updated.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordUpdateTime;
+
+      IndividualGroup cohort ; 
+
+      string ascertainmentMethod ; // TODO: Ontology term?
+
+      string description ;         // plain text description of the study  
+
+      Sources sources ;            // attribution/sources/references/origin
+}
+
+
+/** CohortAnalysisEvidence is a record that describes the analysis of a study cohort.
+    (there may be more than one analysis of a cohort) */
+
+record CohortAnalysisEvidence {
+      
+      /** The evidence UUID. This is globally unique. */
+      string id ;
+      
+      /**
+      The time at which this record was created.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordCreateTime;
+
+      /**
+      The time at which this record was last updated.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordUpdateTime;
+
+      /** Analysis methodology */
+      string methodology ;
+
+      /** cohort that the analysis is based on */
+      StudyCohort study ;
+
+      string description ;         // plain text description of the study  
+
+      Sources sources ;            // attribution/sources/references/origin      
+}
+
+/** ExperimentalEvidence is a record summarizing an experimental assay to study the pathogenicity
+    of one or more variants */
+
+record ExperimentalEvidence {
+
+      /** The evidence UUID. This is globally unique. */
+      string id ;
+
+      /**
+      The time at which this record was created.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordCreateTime;
+
+      /**
+      The time at which this record was last updated.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordUpdateTime;
+
+      /** Description of experimental methodology */
+      string methodology ;
+
+      string description ;         // plain text description of the study  
+
+      Sources sources ;            // attribution/sources/references/origin
+}
+
+/** Classification of a variant (based on BRCA community standards) */
+enum VariantPathogenicityScore
+{
+	BENIGN, LIKELY_BENIGN, UNCERTAIN_SIGNIFICANCE, LIKELY_PATHOGENIC, PATHOGENIC
+}
+
+/** Confidence of the classification of a variant (TODO: check with BRCA community) */ 
+enum VariantClassificationConfidence
+{
+	LOW, MEDIUM, HIGH, VERY_HIGH
+}
+
+/** VariantClassification describes the interpretation or classification of a variant
+    in terms of its pathogenicity and possible disease associations */
+ 
+record VariantClassification {
+
+      /** The classiciation UUID. This is globally unique. */
+      string id ;
+
+      /** The id of the variant that is being classified */
+      string VariantId ;
+
+      /** Classification of the variant */
+      VariantPathogenicityScore variantClassification ;
+
+      /** Confidence of the variant */
+      VariantClassificationConfidence Confidence ; // TODO: define defined vocabulary for the confidence
+
+      /** Association of the variant with a disease */
+      array<OntologyTerm> diseaseAssociations ;
+
+      /** references to experimental evidence, analyses or cohorts 
+          (would refer to objects of type ExperimentalEvidence or CohortAnalysisEvidence)
+          GXR: redundant with sources?
+      */
+      array<string> supportingEvidence ;                 
+
+      /* attribution, references etc */ 
+      Sources sources ;
+}
+
+}

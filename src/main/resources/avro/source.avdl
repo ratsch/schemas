@@ -1,0 +1,85 @@
+@namespace("org.ga4gh.models") 
+
+/**
+This protocol defines source information used in the other GA4GH protocols.
+*/
+
+protocol Disease {
+
+import idl "common.avdl";
+import idl "ontologies.avdl" ;
+
+/** 
+One can refer to an SourceEntity when providing a source reference
+*/
+record SourceEntity {
+
+       string id ;
+
+       /**
+       The source of the entity
+       */
+       string entitySource;
+
+       /**
+       The ID defined by the external entity source.
+       */
+       string entitySourceId;
+
+       /** The name of the entity.  */
+       union { null, string } name = null;
+}
+
+
+/**
+A Source is a set of references to the origin of a piece of information.
+**/
+
+record Source {
+
+      /** The UUID of the referenced object. This is globally unique. */
+      string id;
+      
+      OntologyTerm sourceType ; // TODO: some controlled vocabulary is needed to characterize relationship
+      string entityId ;
+      union {null, float} sourceWeight = null ;
+
+      /**
+      The time at which this record was created.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordCreateTime;
+
+      /**
+      The time at which this record was last updated.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordUpdateTime;
+
+      string remark ;              
+}
+
+/**
+A Sources record is a set of references to the origin of a piece of information.
+**/
+
+record Sources {
+
+      array<Source> sources ;
+
+      /**
+      The time at which this record was created.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordCreateTime;
+
+      /**
+      The time at which this record was last updated.
+      Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+      */
+      string recordUpdateTime;
+
+      string remark ;              
+}
+
+}
