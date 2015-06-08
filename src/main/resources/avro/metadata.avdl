@@ -184,7 +184,8 @@ record Sample {
   */	 
   Sources sources ;
 
-  /** The ID of the individual this sample belongs to. */
+  /** The ID of the individual this sample belongs to. 
+      (should contain reference to Individual) */
   union { null, string } individualId = null;
 
   /** Public identifiers for this sample. */
@@ -376,7 +377,6 @@ record Dataset {
 
   /** A description of the dataset. */
   union { null, string } description = null;
-
 }
 
 /**
@@ -416,6 +416,10 @@ record Analysis {
 
   /** The software run to generate this analysis. */
   array<string> software = [];
+
+  /** List of Experiments related to the analysis 
+      (should be of type Experiment) */
+  array<string> experimentIds ;
 
   /**
   A map of additional analysis information.

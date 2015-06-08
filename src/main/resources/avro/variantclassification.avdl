@@ -7,9 +7,12 @@ Defines types used by the GA4GH VariantClassification API.
 protocol VariantClassification {
 
 import idl "common.avdl" ;
+import idl "source.avdl" ;
 import idl "variants.avdl" ;
 import idl "metadata.avdl" ;
-import idl "source.avdl" ;
+//import idl "variants_simple.avdl" ;
+//import idl "metadata_simple.avdl" ;
+
 
 /** A StudyCohort is a group of individuals assembled for the purpose of subsequent analyses. 
     Specific methodolgy may have been used to identify the group.
@@ -95,8 +98,11 @@ record ExperimentalEvidence {
 
       /** Description of experimental methodology */
       string methodology ;
-
+      
       string description ;         // plain text description of the study  
+
+      /** reference to the experiment that provides the evidence */
+      string experimentId ;
 
       Sources sources ;            // attribution/sources/references/origin
 }
@@ -133,11 +139,11 @@ record VariantClassification {
       /** Association of the variant with a disease */
       array<OntologyTerm> diseaseAssociations ;
 
-      /** references to experimental evidence, analyses or cohorts 
-          (would refer to objects of type ExperimentalEvidence or CohortAnalysisEvidence)
-          GXR: redundant with sources?
-      */
-      array<string> supportingEvidence ;                 
+      /** (references to ExperimentalEvidence) */
+      array<string> experimentalEvidenceIds; 
+
+      /** (references to CohortAnalysisEvidence) */
+      array<string> cohortAnalysisEvidenceIds ;
 
       /* attribution, references etc */ 
       Sources sources ;
