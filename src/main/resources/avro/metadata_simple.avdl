@@ -1,0 +1,270 @@
+@namespace("org.ga4gh.models") 
+
+/**
+This protocol defines metadata used in the other GA4GH protocols.
+*/
+
+protocol Metadata {
+
+import idl "common.avdl";
+import idl "ontologies.avdl";
+//import idl "disease.avdl";
+
+/**
+An individual (or subject) typically corresponds to an individual
+human or other organism.
+
+GXR: BRCA Challenge related info:
+(partially) missing so far: demographics
+*/
+
+record Individual {
+  /** The individual UUID. This is globally unique. */
+  string id;
+
+  /** The IDs of the individual groups this individual belongs to. 
+      (should refer to object of type IndividualGroup)
+  */
+  array<string> groupIds = []; 
+
+  /** The name of the individual. */
+  union { null, string } name = null;
+
+  /** A description of the individual. */
+  union { null, string } description = null;
+
+  /**
+  The time at which this record was created. 
+  Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+  TODO: The format definition is temporary and will be updated to 
+  the upcoming AVRO time format (timestamp-millis) when this is supported.
+  */
+  string recordCreateTime;
+
+  /**
+  The time at which this record was last updated.
+  Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+  */
+  string recordUpdateTime;
+
+  /**
+  The species of this individual. Using
+  [NCBI taxonomy](http://www.ncbi.nlm.nih.gov/taxonomy) is recommended.
+  For a representation of an NCBI Taxon ID as an OntologyTerm, see
+  [NCBITaxon Ontology](http://www.obofoundry.org/wiki/index.php/NCBITaxon:Main_Page).
+  For example, 'Homo sapiens' has the ID 9606. The NCBITaxon ontology ID for this is
+  NCBITaxon:9606, which has the URI http://purl.obolibrary.org/obo/NCBITaxon_9606
+  */
+  union { null, OntologyTerm } species = null;
+
+  /** The strain of this individual, for non-humans. */
+  union { null, string } strain = null;
+  // GXR: can't this be part of an extended species definition?
+
+  /** The genetic sex of this individual. Use `null` when unknown. */
+  union { null, OntologyTerm } sex = null; 
+
+  /**
+  The developmental stage of this individual. Using Uberon is recommended.
+  TODO: Add link to uberon
+  */
+  union { null, OntologyTerm } developmentalStage = null;
+  // GXR: relation to age??
+
+  /**
+  The date of birth of this individual in milliseconds from the epoch.
+  This field may be approximate.
+  */
+  union { null, long } dateOfBirth = null;
+  // GXR: how to deal with dates for de-identified cases?
+
+  /** Diseases with which the individual has been diagnosed.
+      (should refer to object of type Disease)
+      TODO: Is this the right representation?
+  */
+  array<string> diseaseIds = [] ;   // GXR: new disease records with time and characteristics
+
+  /** Phenotypes that were determined for the individual.
+      (should refer to object of type Phenotype)
+      TODO: Is this the right representation?
+  */
+  array<string> phenotypeIds = [] ; // GXR: new phenotype records with characteristics
+
+  /** A description of the clinical treatments used for this individual. 
+      (should refer to object of type Treatment))
+      TODO: Is this the right representation?
+  */
+  //array<string> treatmentIds ; // new list of ids to treatment records
+
+  // GXR environment: smoking, country, religion, ethnicity, race, diet, 
+  //array<string> environmentalContextIds ; // new list of ids to environment records
+  
+  // date of acquisition, place/id of aquirer, sampleid // source/attribution record ??
+  //array<string> sampleIds ; 
+  // BRCA challenge related info: 
+  //   rnaavailable, dnaavailable, lclavailable, buffycoat, tumorblock, tumorslides,
+  // GXR: redundant? We could query the API whether there are any samples for this specific Individual
+
+  /** Phenotypes for this individual.
+      (should refer to object of type Phenotype))
+      TODO: Is this the right representation?
+  */
+  //array<OntologyTerm> phenotypes = [];
+  // GXR: why separate from diseases?  
+
+  /**
+  Disease area specific classification (e.g. classification of cancer samples
+  such as Dukes)
+  */
+  // union { null, string } stagingSystem = null;
+  // GXR: why not part of disease entry? Suggest to remove.
+
+  /**
+  Sources record for this individual (attribution and references to creators, etc)
+  */	 
+  //Sources sources ; 
+
+  /**
+  A map of additional individual information.
+  */
+  map<array<string>> info = {};
+
+}
+
+/**
+Represents a group of individuals. (e.g. a trio, twin, ...)
+*/
+record IndividualGroup {
+  /** The individual group UUID. This is globally unique. */
+  string id;
+
+  /**
+  Sources record for this group (attribution and references to creators, etc)
+  */	 
+  //  Sources sources ;
+
+  /** The name of the individual group. */
+  union { null, string } name = null; 
+
+  /** A description of the individual group. */
+  union { null, string } description = null;
+
+  /**
+  The time at which this record was created. 
+  Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+  */
+  string recordCreateTime;
+
+  /**
+  The time at which this record was last updated.
+  Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+  */
+  string recordUpdateTime;
+
+  /** The type of individual group. */
+  union { null, string } type = null;
+  // GXR: TODO: this should be an onotolgy term
+
+  /**
+  A map of additional individual group information.
+  */
+  map<array<string>> info = {};
+}
+
+
+/**
+An experimental preparation of a `Sample`.
+*/
+record Experiment {
+  /** The experiment UUID. This is globally unique. */
+  string id;
+
+  /**
+  Sources record for this experiment (attribution and references to creators, etc)
+  */	 
+  //Sources sources ;
+
+  /** The name of the experiment. */
+  union { null, string } name = null;
+
+  /** A description of the experiment. */
+  union { null, string } description = null;
+
+  /**
+  The time at which this record was created. 
+  Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+  */
+  string recordCreateTime;
+
+  /**
+  The time at which this record was last updated.
+  Format: ISO 8601, YYYY-MM-DDTHH:MM:SS.SSS (e.g. 2015-02-10T00:03:42.123Z)
+  */
+  string recordUpdateTime;
+
+  /**
+  The time at which this experiment was performed.
+  Granularity here is variabel (e.g. date only).
+  Format: ISO 8601, YYYY-MM-DDTHH:MM:SS (e.g. 2015-02-10T00:03:42)
+  */
+  union { null, string } runTime = null;
+
+  /**
+  The molecule examined in this experiment. (e.g. genomics DNA, total RNA)
+  */
+  // GXR: needs ontology term
+  union { null, string } molecule = null;
+
+  /**
+  The experiment technique or strategy applied to the sample.
+  (e.g. whole genome sequencing, RNA-seq, RIP-seq)
+  */
+  // GXR: needs ontology term here
+  union { null, string } strategy = null;
+
+  /**
+  The method used to enrich the target. (e.g. immunoprecipitation, size
+  fractionation, MNase digestion)
+  */
+  union { null, string } selection = null;
+
+  /** The name of the library used as part of this experiment. */
+  // GXR: appears too specific to sequencing, suggest to use higher level of abstraction 
+  union { null, string } library = null;
+
+  /** The configuration of sequenced reads. (e.g. Single or Paired) */
+  // GXR: appears too specific to sequencing, suggest to use higher level of abstraction
+  union { null, string } libraryLayout = null;
+
+  /**
+    The instrument model used as part of this experiment.
+    This maps to sequencing technology in BAM.
+  */
+  union { null, string } instrumentModel;
+
+  /**
+  The data file generated by the instrument.
+  TODO: This isn't actually a file is it?
+  Should this be `instrumentData` instead?
+  */
+  // GXR: sounds too specific
+  union { null, string } instrumentDataFile = null;
+
+  /** The sequencing center used as part of this experiment. */
+  // GXR too specific, what about "ExperimentSite" 
+  union { null, string } sequencingCenter;
+
+  /**
+  The platform unit used as part of this experiment. This is a flowcell-barcode
+  or slide unique identifier.
+  */
+  // GXR: too specific?
+  union { null, string } platformUnit = null;
+
+  /**
+  A map of additional experiment information.
+  */
+  map<array<string>> info = {};
+}
+
+}

@@ -1,0 +1,38 @@
+@namespace("org.ga4gh.models")
+
+/**
+Defines types used by the GA4GH VariantClassification API.
+*/
+
+protocol Variants {
+
+record Variant {
+
+  /** The variant ID. */
+  string id;
+
+  /** The ID of the variant set this variant belongs to. */
+  string variantSetId;
+
+  /** Names for the variant, for example a RefSNP ID. */
+  array<string> names = [];
+
+  /** The date this variant was created in milliseconds from the epoch. */
+  union { null, long } created = null;
+
+  /**
+  The time at which this variant was last updated in
+  milliseconds from the epoch.
+  */
+  union { null, long } updated = null;
+
+  /**
+  The reference on which this variant occurs.
+  (e.g. `chr20` or `X`)
+
+  If the API server supports the "classic" mode, this field must not be null.
+  */
+  union { null, string } referenceName = null;
+}
+
+}
